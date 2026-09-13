@@ -39,7 +39,7 @@ const allowedOrigins = [
 
  app.use(
   cors({
-    origin: "https://financeai-ai.netlify.app",
+    origin: "https://financal-ai.netlify.app",
     credentials: true
   })
 );
