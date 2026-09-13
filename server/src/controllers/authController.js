@@ -3,10 +3,12 @@ import { ok } from "../utils/api.js";
 import { env } from "../config/env.js";
 import * as auth from "../services/auth/authService.js";
 
+const isProduction = env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: "/"
 };
@@ -16,15 +18,29 @@ export const register = asyncHandler(async (req, res) => {
 
   const { token } = await auth.login(req.body);
 
-  res.cookie("financeai_token", token, cookieOptions);
+  res.cookie(
+    "financeai_token",
+    token,
+    cookieOptions
+  );
 
-  return ok(res, { user }, 201);
+  return ok(
+    res,
+    {
+      user
+    },
+    201
+  );
 });
 
 export const login = asyncHandler(async (req, res) => {
   const result = await auth.login(req.body);
 
-  res.cookie("financeai_token", result.token, cookieOptions);
+  res.cookie(
+    "financeai_token",
+    result.token,
+    cookieOptions
+  );
 
   return ok(res, {
     user: result.user
@@ -32,12 +48,15 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (_req, res) => {
-  res.clearCookie("financeai_token", {
-    httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/"
-  });
+  res.clearCookie(
+    "financeai_token",
+    {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/"
+    }
+  );
 
   return ok(res, {
     loggedOut: true
