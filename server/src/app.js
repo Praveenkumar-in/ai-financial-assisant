@@ -37,30 +37,12 @@ const allowedOrigins = [
   env.CLIENT_URL
 ].filter(Boolean);
 
-app.use(
+ app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server / Postman requests with no Origin header
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      console.log("CORS blocked origin:", origin);
-
-      return callback(
-        new Error(`CORS blocked origin: ${origin}`)
-      );
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    origin: "https://financeai-ai.netlify.app",
+    credentials: true
   })
 );
-
 app.use(
   express.json({
     limit: "1mb"
