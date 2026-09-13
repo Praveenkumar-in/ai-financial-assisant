@@ -33,7 +33,7 @@ app.use(helmet());
  * Must use the exact Netlify URL WITHOUT a trailing slash.
  */
 const allowedOrigins = [
- "https://financal-ai.netlify.app/",
+ "https://financal-ai.netlify.app",
   env.CLIENT_URL
 ].filter(Boolean);
 
