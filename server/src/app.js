@@ -33,39 +33,34 @@ app.use(helmet());
  * Must use the exact Netlify URL WITHOUT a trailing slash.
  */
 const allowedOrigins = [
-  "https://financeai-ai.netlify.app",
+ "https://financal-ai.netlify.app/",
   env.CLIENT_URL
 ].filter(Boolean);
 
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       // Allow server-to-server / Postman requests with no Origin header
-//       if (!origin) {
-//         return callback(null, true);
-//       }
-
-//       if (allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       }
-
-//       console.log("CORS blocked origin:", origin);
-
-//       return callback(
-//         new Error(`CORS blocked origin: ${origin}`)
-//       );
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"]
-//   })
-// );
 app.use(
   cors({
-    origin: "https://financeai-ai.netlify.app",
-    credentials: true
+    origin: (origin, callback) => {
+      // Allow server-to-server / Postman requests with no Origin header
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log("CORS blocked origin:", origin);
+
+      return callback(
+        new Error(`CORS blocked origin: ${origin}`)
+      );
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
 app.use(
   express.json({
     limit: "1mb"
