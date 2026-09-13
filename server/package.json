@@ -1,0 +1,38 @@
+{
+  "name": "finance-ai-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+  "start": "node src/server.js",
+  "dev": "node --watch src/server.js",
+  "prisma:generate": "prisma generate --schema=../prisma/schema.prisma",
+  "prisma:migrate": "prisma migrate dev --schema=../prisma/schema.prisma",
+  "prisma:seed": "node prisma/seed.js",
+  "test": "vitest run",
+  "lint": "eslint ."
+},
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^5.16.0",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.36.0",
+    "prisma": "^6.16.2",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

@@ -1,0 +1,34 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
+import { env } from "./config/env.js";
+import { authRouter } from "./routes/auth.js";
+import { accountsRouter, transactionsRouter, budgetsRouter, goalsRouter, dashboardRouter } from "./routes/crud.js";
+import { aiRouter } from "./routes/ai.js";
+import { bankRouter } from "./routes/bank.js";
+import { categoriesRouter } from "./routes/categories.js";
+import { notFound } from "./middleware/notFound.js";
+import { errorHandler } from "./middleware/error.js";
+
+export const app = express();
+app.set("trust proxy", 1);
+app.use(helmet());
+app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(cookieParser());
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
+
+app.get("/api/health", (_req, res) => res.json({ success: true, data: { status: "ok" } }));
+app.use("/api/auth", authRouter);
+app.use("/api/accounts", accountsRouter);
+app.use("/api/transactions", transactionsRouter);
+app.use("/api/budgets", budgetsRouter);
+app.use("/api/goals", goalsRouter);
+app.use("/api/dashboard", dashboardRouter);
+app.use("/api/ai", aiRouter);
+app.use("/api/bank", bankRouter);
+app.use("/api/categories", categoriesRouter);
+app.use(notFound);
+app.use(errorHandler);

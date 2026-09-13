@@ -1,0 +1,19 @@
+{
+  "name": "finance-ai",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "build": "npm run build --workspace client",
+    "start": "npm start --workspace server",
+    "db:migrate": "npm run prisma:migrate --workspace server",
+    "db:generate": "npm run prisma:generate --workspace server",
+    "db:seed": "npm run prisma:seed --workspace server",
+    "test": "npm test --workspace server",
+    "lint": "npm run lint --workspace server && npm run lint --workspace client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

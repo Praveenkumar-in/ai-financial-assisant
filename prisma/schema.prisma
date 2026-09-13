@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum AccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+  WALLET
+  INVESTMENT
+}
+
+enum ConsentStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+  FAILED
+}
+
+enum BudgetStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model User {
+  id              String            @id @default(cuid())
+  fullName        String
+  email           String            @unique
+  passwordHash    String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  accounts        Account[]
+  transactions    Transaction[]
+  budgets         Budget[]
+  goals           Goal[]
+  consents        Consent[]
+  conversations   AIConversation[]
+}
+
+model Account {
+  id             String        @id @default(cuid())
+  userId         String
+  name           String
+  institution    String?
+  type           AccountType
+  balance        Decimal       @db.Decimal(18, 2)
+  currency       String        @default("INR")
+  maskedNumber   String?
+  isConnected    Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  consents       Consent[]
+
+  @@index([userId])
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  transactions  Transaction[]
+  budgetItems   BudgetCategory[]
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  userId        String
+  accountId     String?
+  categoryId    String?
+  date          DateTime
+  description   String
+  amount        Decimal         @db.Decimal(18, 2)
+  type          TransactionType
+  notes         String?
+  source        String          @default("manual")
+  categoryConfidence Decimal?   @db.Decimal(5, 4)
+  categoryReason String?
+  externalId    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account?        @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([userId, categoryId])
+}
+
+model Budget {
+  id          String          @id @default(cuid())
+  userId      String
+  month       DateTime        @db.Date
+  status      BudgetStatus    @default(ACTIVE)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories  BudgetCategory[]
+
+  @@unique([userId, month])
+  @@index([userId, status])
+}
+
+model BudgetCategory {
+  id        String   @id @default(cuid())
+  budgetId  String
+  categoryId String
+  amount    Decimal  @db.Decimal(18, 2)
+  budget    Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([budgetId, categoryId])
+}
+
+model Goal {
+  id                  String   @id @default(cuid())
+  userId              String
+  name                String
+  targetAmount        Decimal  @db.Decimal(18, 2)
+  currentAmount       Decimal  @db.Decimal(18, 2) @default(0)
+  targetDate          DateTime @db.Date
+  monthlyContribution Decimal  @db.Decimal(18, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Consent {
+  id            String        @id @default(cuid())
+  userId        String
+  accountId     String?
+  provider      String
+  status        ConsentStatus @default(PENDING)
+  externalId    String?
+  expiresAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+}
+
+model AIConversation {
+  id        String       @id @default(cuid())
+  userId    String
+  title     String       @default("FinanceAI conversation")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AIMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AIMessage {
+  id             String        @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  createdAt      DateTime      @default(now())
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
